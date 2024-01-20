@@ -4,10 +4,12 @@ clc;
 
 l1 = 200;
 l2 = 200;
+m1 = 1; 
+m2 = 1;  
+g = 9.81;
 
 pos1 = [];
 pos2 = [];
-
 
 xvalue = [];
 yvalue = [];
@@ -46,6 +48,9 @@ for i = 1:n+2
     theta1 = [theta1, theta1_i];
 end
 
+torque1 = [];
+torque2 = [];
+
 for i = 1:n+1
     to = ti(i);
     q1 = theta1(i);  
@@ -78,22 +83,34 @@ for i = 1:n+1
     t1 = linspace(ti(i), ti(i+1), 100);
     q2_interp = a2(1) + a2(2)*t1 + a2(3)*t1.^2 + a2(4)*t1.^3;
     pos2 = [pos2, q2_interp];
+
+    q1dot = a(2) + 2*a(3)*t + 3*a(4)*t.^2;
+    q1ddot = 2*a(3) + 6*a(4)*t;
+    
+    q1dotf = q1dot(end);
+
+    tou1 = m2*l2^2*q1ddot + m2*l1*l2*cos(deg2rad(q2_interp)).*(2*q1ddot + q1ddot) + (m1 + m2)*l1^2*q1ddot - m2*l1*l2*sin(deg2rad(q2_interp)).*q1dot.^2 - 2*m2*l1*l2*sin(deg2rad(q2_interp)).*q1dot.*q1dotf + m2*l2*g*cos(deg2rad(q1_interp) + deg2rad(q2_interp)) + (m1 + m2)*l1*g*cos(deg2rad(q1_interp));
+    torque1 = [torque1, tou1];
+
+    q2dot = a2(2) + 2*a2(3)*t1 + 3*a2(4)*t1.^2;
+    q2ddot = 2*a2(3) + 6*a2(4)*t1;
+    tou2 = m2*l1*l2*cos(deg2rad(q2_interp)).*q2ddot + m2*l1*l2*sin(deg2rad(q2_interp)).*q2dot.^2 + m2*l2*g*cos(deg2rad(q1_interp) + deg2rad(q2_interp)) + m2*l2^2*(q2ddot + q2ddot);
+    torque2 = [torque2, tou2];
 end
 
-
 figure(1);
-subplot(2,1,1)
+subplot(2,2,1)
 plot(linspace(0, tt, length(pos1)), pos1)
 title('Theta1 Interpolation')
 
-subplot(2,1,2)
+subplot(2,2,2)
 plot(linspace(0, tt, length(pos2)), pos2)
 title('Theta2 Interpolation')
 
+subplot(2,2,3)
+plot(linspace(0, tt, length(torque1)), torque1)
+title('Torque 1')
 
-time = linspace(0,tt,length(pos1));
-aa = transpose(pos1);
-bb = transpose(pos2);
-cc = transpose(time);
-d = [cc,aa];
-e = [cc,bb];
+subplot(2,2,4)
+plot(linspace(0, tt, length(torque2)), torque2)
+title('Torque 2')
