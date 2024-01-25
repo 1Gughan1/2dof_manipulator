@@ -98,7 +98,12 @@ for i = 1:n+1
     tou2 = m2*l1*l2*cos(deg2rad(q2_interp)).*q2ddot + m2*l1*l2*sin(deg2rad(q2_interp)).*q2dot.^2 + m2*l2*g*cos(deg2rad(q1_interp) + deg2rad(q2_interp)) + m2*l2^2*(q2ddot + q2ddot);
     torque2 = [torque2, tou2];
 end
-
+time = linspace(0,tt,length(pos1));
+aa = transpose(pos1);
+bb = transpose(pos2);
+cc = transpose(time);
+d = [cc,aa];
+e = [cc,bb];
 figure(1);
 subplot(2,2,1)
 plot(linspace(0, tt, length(pos1)), pos1)
